@@ -37,6 +37,27 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
             return FindCore(container, GetQualifiedNameList(symbol)).Where(m => VisitorHelper.GetCommentId(m) == VisitorHelper.GetCommentId(symbol)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// check if symbol is internal object that could contain inheritdoc comments used by public objects
+        /// </summary>
+        /// <param name="symbol">symbol</param>
+        /// <returns>true if symbol is internal but could still contain inheritdoc comments used by public objects</returns>
+        public static bool IsInheritDocOnly(this ISymbol symbol)
+        {
+            if (symbol is INamedTypeSymbol namedTypeSymbol)
+            {
+                if (
+                    namedTypeSymbol.TypeKind == TypeKind.Interface &&
+                    namedTypeSymbol.DeclaredAccessibility == Accessibility.Friend)
+                {
+                    return true;
+                }
+            }
+
+            // check parents recursively until symbol is null
+            return symbol?.ContainingSymbol?.IsInheritDocOnly() ?? false;
+        }
+
         private static IEnumerable<ISymbol> FindCore(INamespaceOrTypeSymbol container, List<string> parts)
         {
             var stack = new Stack<Tuple<ISymbol, int>>();

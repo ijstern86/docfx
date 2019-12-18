@@ -3,8 +3,9 @@
 
 namespace Microsoft.DocAsCode.Metadata.ManagedReference
 {
+    using System.Collections.Generic;
     using System.Diagnostics;
-
+    using System.Linq;
     using Microsoft.DocAsCode.Common;
     using Microsoft.DocAsCode.DataContracts.ManagedReference;
 
@@ -27,6 +28,9 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
                     }
                     return true;
                 });
+
+            RemoveInheritDocOnlyMembers(context);
+            RemoveInheritDocOnlyReferenences(context);
         }
 
         private static void InheritDoc(MetadataItem dest, ResolverContext context)
@@ -142,6 +146,45 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
             }
 
             dest.CopyInheritedData(src);
+        }
+
+        private static void RemoveInheritDocOnlyMembers(ResolverContext context)
+        {
+            context.Members = context.Members
+                .Where(pair => !pair.Value.IsInheritDocOnly)
+                .ToDictionary(pair => pair.Key, pair => RemoveInheritDocOnlyMembers(pair.Value));
+        }
+
+        private static MetadataItem RemoveInheritDocOnlyMembers(MetadataItem item)
+        {
+            item.Items = item.Items?
+                .Where(childItem => !childItem.IsInheritDocOnly)
+                .Select(childItem => RemoveInheritDocOnlyMembers(childItem))
+                .ToList();
+            return item;
+        }
+
+        private static void RemoveInheritDocOnlyReferenences(ResolverContext context)
+        {
+            HashSet<string> removeReferences = new HashSet<string>(context.References
+                .Where(pair => pair.Value.IsInheritDocOnly)
+                .Select(pair => pair.Key));
+
+            context.References = context.References
+                .Where(pair => !pair.Value.IsInheritDocOnly)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            foreach (var item in context.Members.Values)
+                RemoveInheritDocOnlyImplements(item, removeReferences);
+        }
+
+        private static void RemoveInheritDocOnlyImplements(MetadataItem item, HashSet<string> removeReferences)
+        {
+            item.Implements = item.Implements?
+                .Where(reference => !removeReferences.Contains(reference)).ToList();
+
+            item.Items?
+                .ForEach(child => RemoveInheritDocOnlyImplements(child, removeReferences));
         }
     }
 }

@@ -161,6 +161,10 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
 
         [YamlIgnore]
         [JsonIgnore]
+        public bool IsInheritDocOnly { get; set; }
+
+        [YamlIgnore]
+        [JsonIgnore]
         public TripleSlashCommentModel CommentModel { get; set; }
 
         public override string ToString()

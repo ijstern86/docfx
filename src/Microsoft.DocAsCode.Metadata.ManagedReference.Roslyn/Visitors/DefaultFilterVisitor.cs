@@ -117,10 +117,13 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
                     case Accessibility.ProtectedOrInternal:
                         return wantProtectedMember && visitFunc(symbol.ContainingType, wantProtectedMember, outer);
                     default:
-                        return false;
+                        return symbol.IsInheritDocOnly();
                 }
             }
-            return symbol.DeclaredAccessibility == Accessibility.Public;
+
+            if (symbol.DeclaredAccessibility == Accessibility.Public)
+                return true;
+            return symbol.IsInheritDocOnly();
         }
 
         private static bool CanVisitCore(IMethodSymbol symbol, Func<ISymbol, bool, IFilterVisitor, bool> visitFunc, bool wantProtectedMember, IFilterVisitor outer)

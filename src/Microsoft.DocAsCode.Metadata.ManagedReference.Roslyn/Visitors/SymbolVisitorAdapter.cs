@@ -225,12 +225,14 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
                 var memberItem = member.Accept(this);
                 if (memberItem != null)
                 {
+                    memberItem.IsInheritDocOnly = member.IsInheritDocOnly();
                     item.Items.Add(memberItem);
                 }
             }
 
             AddReference(symbol);
 
+            item.IsInheritDocOnly = symbol.IsInheritDocOnly();
             item.Attributes = GetAttributeInfo(symbol.GetAttributes());
 
             return item;
