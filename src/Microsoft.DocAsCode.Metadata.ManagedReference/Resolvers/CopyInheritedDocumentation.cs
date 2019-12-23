@@ -181,7 +181,12 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
         private static void RemoveInheritDocOnlyImplements(MetadataItem item, HashSet<string> removeReferences)
         {
             item.Implements = item.Implements?
-                .Where(reference => !removeReferences.Contains(reference)).ToList();
+                .Where(implement =>
+                {
+                    return
+                        !removeReferences.Contains(implement) &&
+                        !removeReferences.Contains($"{implement}*");
+                }).ToList();
 
             item.Items?
                 .ForEach(child => RemoveInheritDocOnlyImplements(child, removeReferences));
