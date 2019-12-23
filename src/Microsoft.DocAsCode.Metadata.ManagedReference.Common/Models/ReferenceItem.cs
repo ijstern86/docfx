@@ -36,8 +36,8 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
         [JsonProperty(Constants.PropertyName.CommentId)]
         public string CommentId { get; set; }
 
-        [YamlIgnore]
-        [JsonIgnore]
+        [YamlMember(Alias = "isInheritDocOnly")]
+        [JsonProperty("isInheritDocOnly")]
         public bool IsInheritDocOnly { get; set; }
 
         public ReferenceItem Clone()

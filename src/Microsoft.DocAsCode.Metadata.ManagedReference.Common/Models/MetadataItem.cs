@@ -159,8 +159,8 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
         [JsonIgnore]
         public bool IsInheritDoc { get; set; }
 
-        [YamlIgnore]
-        [JsonIgnore]
+        [YamlMember(Alias = "isInheritDocOnly")]
+        [JsonProperty("isInheritDocOnly")]
         public bool IsInheritDocOnly { get; set; }
 
         [YamlIgnore]
